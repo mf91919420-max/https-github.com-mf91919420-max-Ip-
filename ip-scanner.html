@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>اسکنر حرفه‌ای آی‌پی</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap');
+    :root {
+      --bg: #07090f;
+      --card: rgba(12,15,26,0.85);
+      --cyan: #00e5ff;
+      --gold: #ffc107;
+      --purple: #7c5cfc;
+      --green: #00e676;
+      --red: #ff4f4f;
+      --silver: #b0bec5;
+      --bronze: #bf8c5a;
+      --dim: #546e8a;
+      --bright: #e8f0fe;
+      --r: 20px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 10% 20%, rgba(0,229,255,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 90% 80%, rgba(124,92,252,0.06) 0%, transparent 60%);
+      color: var(--bright); min-height:100vh; padding:20px 14px; direction:rtl;
+    }
+    .wrap { max-width:700px; margin:0 auto; }
+
+    /* Header */
+    .header { text-align:center; margin-bottom:22px; }
+    .header h1 {
+      font-size:1.7rem; font-weight:800;
+      background: linear-gradient(130deg, var(--gold), var(--cyan), var(--purple));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      margin-bottom:4px;
+    }
+    .header small { color:var(--dim); font-size:0.72rem; }
+
+    /* IP Status Bar */
+    .ip-bar {
+      background: rgba(0,229,255,0.05);
+      border: 1px solid rgba(0,229,255,0.15);
+      border-radius: 14px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .ip-bar .my-ip {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ip-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .ip-val { font-family: 'Courier New', monospace; font-size:0.85rem; color:var(--cyan); font-weight:600; }
+    .ip-meta { display:flex; gap:8px; flex-wrap:wrap; }
+    .chip {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 30px; padding: 2px 10px;
+      font-size: 0.65rem; color: var(--dim);
+    }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(0,229,255,0.12);
+      border-radius: var(--r);
+      padding: 18px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(12px);
+    }
+    .lbl {
+      font-size:0.7rem; letter-spacing:1.5px; text-transform:uppercase;
+      font-weight:700; color:var(--cyan); margin-bottom:10px;
+    }
+
+    textarea, input[type="number"] {
+      width:100%; background:#030509;
+      border: 1px solid #1a2540;
+      border-radius: 14px; padding:12px;
+      color: var(--bright); font-family:'Courier New',monospace;
+      font-size:12px; resize:vertical; transition: border-color 0.2s;
+    }
+    textarea { min-height:130px; direction:ltr; }
+    textarea:focus, input:focus {
+      outline:none; border-color:var(--cyan);
+      box-shadow: 0 0 0 3px rgba(0,229,255,0.1);
+    }
+
+    .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; }
+    .btn {
+      padding:8px 16px; border-radius:30px; font-weight:600;
+      cursor:pointer; border: 1px solid #2a3a55;
+      background:#0c1220; color:var(--bright);
+      transition: all 0.2s; display:inline-flex;
+      align-items:center; gap:5px; font-size:0.78rem;
+      font-family:'Vazirmatn',sans-serif;
+    }
+    .btn:hover { filter:brightness(1.35); transform:translateY(-1px); }
+    .btn:active { transform:translateY(0); }
+    .btn-blue { background:linear-gradient(95deg,#0062cc,#00b4d8); border:none; color:#fff; box-shadow:0 4px 14px rgba(0,180,216,0.3); }
+    .btn-orange { background:linear-gradient(95deg,#e65100,#ff8f00); border:none; color:#fff; }
+    .btn-red { border-color:var(--red); color:#ff8080; }
+    .btn-red:hover { background:rgba(255,79,79,0.15); }
+
+    /* Stats */
+    .stats { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:14px; }
+    .stat { background:#030509; border-radius:14px; padding:10px 6px; text-align:center; border-bottom:2px solid #1a2540; }
+    .stat .v { font-size:1.4rem; font-weight:800; font-family:monospace; color:var(--cyan); line-height:1; }
+    .stat .t { font-size:0.6rem; color:var(--dim); margin-top:3px; }
+    .stat.gold-s .v { color:var(--gold); }
+    .stat.silver-s .v { color:var(--silver); }
+    .stat.bronze-s .v { color:var(--bronze); }
+
+    /* Progress */
+    .prog-group { margin-bottom:12px; }
+    .prog-header { display:flex; justify-content:space-between; font-size:0.68rem; color:var(--dim); margin-bottom:4px; }
+    .prog-track { height:22px; background:#0a0f1c; border-radius:30px; overflow:hidden; border:1px solid #1a2540; position:relative; }
+    .prog-fill { height:100%; width:0%; transition:width 0.15s linear; border-radius:30px; }
+    .prog-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:700; }
+
+    /* Protocol toggles */
+    .proto-section {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; padding:12px; margin-bottom:12px;
+    }
+    .proto-section .sec-label { font-size:0.7rem; font-weight:700; margin-bottom:10px; }
+    .proto-section.mandatory .sec-label { color:var(--gold); }
+    .proto-section.display-sec .sec-label { color:var(--cyan); }
+    .proto-dots { display:flex; justify-content:space-around; }
+    .pdot {
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      cursor:pointer; user-select:none;
+    }
+    .pdot-circle {
+      width:32px; height:32px; border-radius:50%;
+      border:2px solid #2a3a55;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.75rem; transition: all 0.2s;
+    }
+    .pdot-circle.on-cyan { border-color:var(--cyan); background:rgba(0,229,255,0.15); box-shadow:0 0 10px rgba(0,229,255,0.25); color:var(--cyan); }
+    .pdot-circle.on-gold { border-color:var(--gold); background:rgba(255,193,7,0.15); box-shadow:0 0 10px rgba(255,193,7,0.25); color:var(--gold); }
+    .pdot-name { font-size:0.6rem; color:var(--dim); }
+
+    /* Filters */
+    .filter-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; font-size:0.75rem; }
+    .filter-row label { display:flex; align-items:center; gap:4px; cursor:pointer; }
+    .slider-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; font-size:0.72rem; color:var(--dim); }
+    .slider-row input[type="range"] { flex:1; min-width:80px; accent-color:var(--cyan); }
+    .slider-val { color:var(--cyan); font-weight:600; min-width:50px; text-align:center; }
+
+    /* Table */
+    .table-wrap { max-height:300px; overflow:auto; border-radius:14px; border:1px solid #1a2540; background:#020408; margin-bottom:10px; }
+    table { width:100%; border-collapse:collapse; font-size:0.72rem; }
+    th { background:#0a0e1a; padding:10px; color:var(--cyan); font-weight:700; position:sticky; top:0; z-index:1; }
+    td { padding:9px; text-align:center; border-bottom:1px solid #0f1a2c; font-family:'Courier New',monospace; }
+    tr:last-child td { border-bottom:none; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:0.62rem; font-weight:700; }
+    .proto-badge { padding:1px 6px; border-radius:10px; font-size:0.6rem; border:1px solid; margin:1px; display:inline-block; }
+
+    .gold-bg { background:rgba(255,193,7,0.12); color:var(--gold); border-color:rgba(255,193,7,0.3); }
+    .silver-bg { background:rgba(176,190,197,0.1); color:var(--silver); border-color:rgba(176,190,197,0.3); }
+    .bronze-bg { background:rgba(191,140,90,0.1); color:var(--bronze); border-color:rgba(191,140,90,0.3); }
+
+    /* Output */
+    .out-textarea { width:100%; background:#030509; border:1px solid #1a2540; border-radius:14px; padding:12px; color:var(--bright); font-family:'Courier New',monospace; font-size:12px; min-height:70px; resize:vertical; direction:ltr; }
+
+    /* Settings */
+    .settings { display:none; margin-top:14px; padding-top:14px; border-top:1px dashed #1a2540; }
+    .settings.open { display:block; }
+    .settings-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .settings-grid > div .lbl { margin-bottom:6px; }
+
+    /* Proto stats */
+    .proto-stat-row { display:flex; justify-content:space-around; }
+    .pstat { text-align:center; }
+    .pstat-num { font-size:1.1rem; font-weight:800; font-family:monospace; }
+    .pstat-name { font-size:0.6rem; color:var(--dim); }
+
+    /* Toast */
+    .toast {
+      position:fixed; top:16px; left:50%; transform:translateX(-50%) translateY(-30px);
+      background:#0c1520; border-left:3px solid var(--cyan); color:#fff;
+      padding:8px 20px; border-radius:30px; font-size:0.8rem;
+      opacity:0; transition:0.2s; z-index:9999; white-space:nowrap;
+      font-family:'Vazirmatn',sans-serif;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    @media(max-width:500px) {
+      .stats { grid-template-columns:repeat(3,1fr); }
+      .settings-grid { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="wrap">
+  <div class="header">
+    <h1>🛡 اسکنر حرفه‌ای آی‌پی</h1>
+    <small>تست موازی ۶ پروتکل | Survival Mode | طلایی ۴+</small>
+  </div>
+
+  <!-- IP Bar -->
+  <div class="ip-bar">
+    <div class="my-ip">
+      <div class="ip-dot"></div>
+      <span style="font-size:0.7rem;color:var(--dim);">آی‌پی شما:</span>
+      <span class="ip-val" id="myIp">در حال دریافت...</span>
+    </div>
+    <div class="ip-meta" id="ipMeta"></div>
+  </div>
+
+  <!-- Input -->
+  <div class="card">
+    <div class="lbl">📥 لیست آی‌پی</div>
+    <textarea id="ipInput" placeholder="23.32.0.1&#10;104.64.0.0/25&#10;2.18.0.10-2.18.0.30"></textarea>
+    <div class="row">
+      <button id="btnAkamai" class="btn" style="background:linear-gradient(95deg,#d4570a,#f5a623);border:none;color:#fff;">🎲 آکامای</button>
+      <button id="btnGoogle" class="btn" style="background:linear-gradient(95deg,#1a73e8,#34a853);border:none;color:#fff;">🎲 گوگل</button>
+      <label class="btn" style="cursor:pointer;">📂 فایل <input type="file" id="fileInput" accept=".txt,.list" hidden></label>
+      <button id="btnPaste" class="btn">📋 جای‌گذاری</button>
+    </div>
+    <div class="row">
+      <button id="btnQuick" class="btn btn-blue">🔍 اسکن سریع</button>
+      <button id="btnDeep" class="btn btn-orange">🔬 اسکن عمیق</button>
+      <button id="btnAdvanced" class="btn">⚙️ پیشرفته</button>
+      <button id="btnStop" class="btn btn-red" style="display:none;">⏹ توقف</button>
+    </div>
+
+    <div id="settingsPanel" class="settings">
+      <div class="settings-grid">
+        <div><div class="lbl">سایکل</div><input type="number" id="inCycles" value="3" min="1" max="10"></div>
+        <div><div class="lbl">تایم‌اوت (ms)</div><input type="number" id="inTimeout" value="2200" min="500"></div>
+        <div><div class="lbl">همزمانی</div><input type="number" id="inConcurrency" value="24" min="1" max="100"></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:0.78rem;cursor:pointer;">
+        <input type="checkbox" id="inSurvival" checked> 🛡️ Survival Mode (همه سایکل‌ها موفق باشن)
+      </label>
+      <button id="btnCustom" class="btn btn-blue" style="margin-top:12px;">🚀 شروع سفارشی</button>
+    </div>
+  </div>
+
+  <!-- Stats + Progress -->
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><div class="v" id="stTotal">0</div><div class="t">کل</div></div>
+      <div class="stat"><div class="v" id="stScanned">0</div><div class="t">اسکن‌شده</div></div>
+      <div class="stat"><div class="v" id="stAlive">0</div><div class="t">زنده</div></div>
+      <div class="stat gold-s"><div class="v" id="stGold">0</div><div class="t">🏅 طلایی</div></div>
+      <div class="stat silver-s"><div class="v" id="stSilver">0</div><div class="t">🥈 نقره</div></div>
+      <div class="stat bronze-s"><div class="v" id="stBronze">0</div><div class="t">🥉 برنز</div></div>
+    </div>
+
+    <div class="prog-group">
+      <div class="prog-header">
+        <span>📊 پیشرفت کل</span>
+        <span id="cycleLabel">سایکل ۱ از ۱</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" id="pOverall" style="background:linear-gradient(90deg,#00e5ff,#7c5cfc);"></div>
+        <div class="prog-text" id="pOverallTxt">۰٪</div>
+      </div>
+    </div>
+    <div class="prog-group">
+      <div class="prog-header"><span>🔄 سایکل فعلی</span></div>
+      <div class="prog-track">
+        <div class="prog-fill" id="pCycle" style="background:linear-gradient(90deg,var(--gold),var(--red));"></div>
+        <div class="prog-text" id="pCycleTxt">۰٪</div>
+      </div>
+    </div>
+    <div class="prog-group" style="margin-bottom:0;">
+      <div class="prog-header"><span>⚡ دسته فعلی</span></div>
+      <div class="prog-track">
+        <div class="prog-fill" id="pBatch" style="background:linear-gradient(90deg,var(--green),var(--cyan));"></div>
+        <div class="prog-text" id="pBatchTxt">۰٪</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Proto stats (hidden until scan) -->
+  <div class="card" id="cardProtoStats" style="display:none;">
+    <div class="lbl">📈 تعداد زنده هر پروتکل</div>
+    <div class="proto-stat-row" id="protoStatsRow"></div>
+  </div>
+
+  <!-- Filter + Output -->
+  <div class="card">
+    <!-- Mandatory -->
+    <div class="proto-section mandatory">
+      <div class="sec-label">❗ اجباری — حتماً این پروتکل رو داشته باشه</div>
+      <div class="proto-dots" id="mandatoryDots"></div>
+    </div>
+    <!-- Display -->
+    <div class="proto-section display-sec">
+      <div class="sec-label">👁 نمایش — این پروتکل‌ها رو توی خروجی نشون بده</div>
+      <div class="proto-dots" id="displayDots"></div>
+    </div>
+
+    <!-- Grade filter -->
+    <div class="filter-row">
+      <label><input type="checkbox" id="fGold" checked> 🏅 طلایی</label>
+      <label><input type="checkbox" id="fSilver" checked> 🥈 نقره</label>
+      <label><input type="checkbox" id="fBronze" checked> 🥉 برنز</label>
+      <label><input type="checkbox" id="fAll"> 🌐 همه</label>
+    </div>
+
+    <!-- Sliders -->
+    <div class="slider-row">
+      <span>پایداری ≥</span>
+      <input type="range" id="stabSlider" min="0" max="100" value="0">
+      <span class="slider-val" id="stabVal">۰٪</span>
+      <span>پینگ ≤</span>
+      <input type="range" id="pingSlider" min="0" max="3000" value="3000">
+      <span class="slider-val" id="pingVal">۳۰۰۰ms</span>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>آی‌پی</th><th>پینگ</th><th>ثبات</th><th>امتیاز</th><th>پروتکل‌ها</th></tr>
+        </thead>
+        <tbody id="resultBody"><tr><td colspan="5" style="color:var(--dim);padding:20px;">منتظر اسکن...</td></tr></tbody>
+      </table>
+    </div>
+
+    <textarea class="out-textarea" id="simpleOutput" readonly placeholder="آی‌پی‌های فیلترشده اینجا ظاهر میشن..."></textarea>
+    <div class="row" style="justify-content:flex-end;margin-top:8px;">
+      <button id="btnCopy" class="btn">📋 کپی</button>
+      <button id="btnDownload" class="btn">💾 دانلود TXT</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== CONFIG ===================
+const METHODS = ['https','http','wss','socks','image','tcp'];
+const PROTO_NAME = {https:'HTTPS', http:'HTTP', wss:'WSS', socks:'SOCKS', image:'Image', tcp:'TCP'};
+const PROTO_COLOR = {https:'#00e676', http:'#29b6f6', wss:'#ab47bc', socks:'#ffa726', image:'#ef5350', tcp:'#78909c'};
+
+// =================== IP UTILS ===================
+function ipToInt(ip){ return ip.split('.').reduce((s,n)=>((s*256)+(+n))>>>0, 0); }
+function intToIp(n){ return [(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.'); }
+
+function extractIPs(text){
+  const set = new Set();
+  for(let line of text.split(/\r?\n/)){
+    line = line.trim();
+    if(!line || line.startsWith('#')) continue;
+
+    // CIDR — new regex each call to avoid lastIndex bug
+    const cidrRe = /((?:\d{1,3}\.){3}\d{1,3})\/(\d{1,2})/g;
+    for(let m; (m=cidrRe.exec(line))!==null;){
+      const bits = +m[2];
+      if(bits>=16 && bits<=32){
+        const base = ipToInt(m[1]) & (~((1<<(32-bits))-1)>>>0);
+        const count = Math.min(1<<(32-bits), 2048);
+        for(let i=0;i<count;i++) set.add(intToIp((base+i)>>>0));
+      }
+    }
+
+    // Range — new regex each call
+    const rangeRe = /((?:\d{1,3}\.){3}\d{1,3})\s*-\s*((?:\d{1,3}\.){3}\d{1,3})/g;
+    for(let m; (m=rangeRe.exec(line))!==null;){
+      const s=ipToInt(m[1]), e=ipToInt(m[2]);
+      if(e>=s && (e-s)<=2048) for(let i=s;i<=e;i++) set.add(intToIp(i));
+    }
+
+    // Plain IPs
+    const ipRe = /(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)/g;
+    for(let m; (m=ipRe.exec(line))!==null;) set.add(m[0]);
+  }
+  return [...set];
+}
+
+// Random IPs
+const AKAMAI = ["23.32","23.33","23.34","23.35","23.36","23.37","23.38","23.39","23.40","23.41","23.42","23.43","23.44","23.45","23.46","23.47","23.48","23.49","23.50","23.51","23.52","23.53","23.54","23.55","23.56","23.57","23.58","23.59","23.60","23.61","23.62","23.63","23.64","23.65","23.66","23.67","23.68","23.69","23.70","23.71","23.72","23.73","23.74","23.75","23.76","23.77","23.78","23.79","23.80","23.81","23.82","23.83","23.84","23.85","23.86","23.87","23.88","23.89","23.90","23.91","23.92","23.93","23.94","23.95","104.64","104.65","104.66","104.67","104.68","104.69","104.70","104.71","104.72","104.73","104.74","104.75","104.76","104.77","104.78","104.79","104.80","104.81","104.82","104.83","104.84","104.85","104.86","104.87","104.88","104.89","104.90","104.91","104.92","104.93","104.94","104.95","2.16","2.17","2.18","2.19","2.20","2.21","2.22","2.23","92.123","173.222","173.223","96.16","96.17","184.24","184.25","184.26","184.27"];
+const GOOGLE = ["34.96.0.0/24","34.102.0.0/24","34.107.0.0/24","34.117.0.0/24","34.120.0.0/24","64.233.160.0/24","66.249.80.0/24","74.125.0.0/24","108.177.0.0/24","130.211.0.0/24","172.217.0.0/24","173.194.0.0/24","216.58.192.0/24","142.250.0.0/24"];
+const rnd256 = ()=>Math.floor(Math.random()*256);
+const randAk = ()=>AKAMAI[Math.floor(Math.random()*AKAMAI.length)]+'.'+rnd256()+'.'+rnd256();
+const randGo = ()=>GOOGLE[Math.floor(Math.random()*GOOGLE.length)].split('/')[0].split('.').slice(0,3).join('.')+'.'+rnd256();
+
+// =================== PROTOCOL TESTS ===================
+// ALL PARALLEL — key fix vs original
+function testHttp(ip, t, proto){
+  return new Promise(res=>{
+    const s=performance.now();
+    const timer=setTimeout(()=>res({a:0,l:t}),t);
+    fetch(`${proto}://${ip}/`,{method:'HEAD',mode:'no-cors'})
+      .then(()=>{clearTimeout(timer);res({a:1,l:Math.round(performance.now()-s)});})
+      .catch(()=>{
+        const lat=Math.round(performance.now()-s);
+        clearTimeout(timer);
+        // if it failed very fast, it probably got a RST (server exists)
+        res({a: lat<t*0.8 ? 1 : 0, l:lat});
+      });
+  });
+}
+
+function testWs(ip, url, t){
+  return new Promise(res=>{
+    const s=performance.now();
+    let done=false;
+    let ws;
+    const timer=setTimeout(()=>{if(!done){done=true;try{ws.close();}catch(e){}res({a:0,l:t});}},t);
+    try{
+      ws=new WebSocket(url);
+      ws.onopen=()=>{if(!done){done=true;clearTimeout(timer);ws.close();res({a:1,l:Math.round(performance.now()-s)});}};
+      ws.onerror=()=>{if(!done){done=true;clearTimeout(timer);try{ws.close();}catch(e){}res({a:0,l:Math.round(performance.now()-s)});}};
+    }catch(e){if(!done){done=true;clearTimeout(timer);res({a:0,l:0});}}
+  });
+}
+
+function testImage(ip, t){
+  return new Promise(res=>{
+    const s=performance.now();
+    let done=false;
+    const timer=setTimeout(()=>{if(!done){done=true;res({a:0,l:t});}},t);
+    const img=new Image();
+    img.onload=()=>{if(!done){done=true;clearTimeout(timer);res({a:1,l:Math.round(performance.now()-s)});}};
+    img.onerror=()=>{if(!done){done=true;clearTimeout(timer);res({a:0,l:Math.round(performance.now()-s)});}};
+    img.src=`https://${ip}/favicon.ico?_=${Date.now()}`;
+  });
+}
+
+// ★ KEY FIX: all 6 protocols tested IN PARALLEL with Promise.all
+async function testIP(ip, timeout){
+  const [https, http, wss, socks, image, tcp] = await Promise.all([
+    testHttp(ip, timeout, 'https'),
+    testHttp(ip, timeout, 'http'),
+    testWs(ip, `wss://${ip}/`, timeout),
+    testWs(ip, `ws://${ip}:1080`, timeout),
+    testImage(ip, timeout),
+    testHttp(ip, timeout, 'http').then(r=>r), // TCP via HTTP port
+  ]);
+  return {https, http, wss, socks, image, tcp};
+}
+
+// =================== STATE ===================
+let S = {
+  running:false, stop:false,
+  all:[], processed:0,
+  results: new Map(), share: new Map(),
+  rawCycles: [],
+  totalCycles:1, currentCycle:1, cyclesUsed:1,
+  totalTests:0, completedTests:0,
+  cycleTotal:0, cycleDone:0,
+  batchTotal:0, batchDone:0,
+};
+
+let mandatorySet = new Set();
+let displaySet = new Set(['https','http','socks']);
+
+// =================== UI THROTTLE ===================
+// ★ KEY FIX: throttle UI updates to max 10fps to stop DOM thrash
+let uiDirty = false;
+let uiTimer = null;
+function scheduleUI(){
+  if(uiDirty) return;
+  uiDirty = true;
+  if(!uiTimer) uiTimer = setInterval(()=>{
+    if(uiDirty){ uiDirty=false; doUIUpdate(); }
+  }, 100);
+}
+function stopUITimer(){ clearInterval(uiTimer); uiTimer=null; doUIUpdate(); }
+
+function doUIUpdate(){
+  // stats
+  document.getElementById('stTotal').textContent = S.all.length;
+  document.getElementById('stScanned').textContent = S.processed;
+  document.getElementById('stAlive').textContent = S.results.size;
+  // progress bars
+  const op = S.totalTests ? Math.min(100, Math.round(S.completedTests/S.totalTests*100)) : 0;
+  setBar('pOverall','pOverallTxt', op);
+  const cp = S.cycleTotal ? Math.min(100, Math.round(S.cycleDone/S.cycleTotal*100)) : 0;
+  setBar('pCycle','pCycleTxt', cp);
+  const bp = S.batchTotal ? Math.min(100, Math.round(S.batchDone/S.batchTotal*100)) : 0;
+  setBar('pBatch','pBatchTxt', bp);
+  document.getElementById('cycleLabel').textContent = `سایکل ${S.currentCycle} از ${S.totalCycles}`;
+}
+
+function setBar(fillId, txtId, pct){
+  document.getElementById(fillId).style.width = pct+'%';
+  document.getElementById(txtId).textContent = pct+'٪';
+}
+
+// =================== SCAN ENGINE ===================
+async function runPrescan(ips, concurrency){
+  S.results = new Map();
+  S.rawCycles = [];
+  S.totalTests = ips.length * S.cyclesUsed;
+  S.completedTests = 0;
+  S.cycleTotal = ips.length;
+  S.cycleDone = 0;
+  S.batchTotal = ips.length;
+  S.batchDone = 0;
+  S.currentCycle = 1;
+  scheduleUI();
+
+  const cycle0 = new Map();
+  S.rawCycles[0] = cycle0;
+  let idx=0;
+  await runWorkers(concurrency, async()=>{
+    if(idx>=ips.length || S.stop) return;
+    const ip=ips[idx++];
+    const res=await testIP(ip, 1200);
+    cycle0.set(ip, res);
+    let any=false;
+    for(let m of METHODS) if(res[m]?.a || res[m]?.alive) any=true;
+    if(any) S.results.set(ip, normalizeRes(res));
+    S.processed++; S.completedTests++; S.cycleDone++; S.batchDone++;
+    scheduleUI();
+  }, ips.length);
+
+  return [...S.results.keys()];
+}
+
+function normalizeRes(res){
+  // support both {a, l} and {alive, latency} shapes
+  const out={};
+  for(let m of METHODS){
+    const r=res[m]||{};
+    out[m]={ alive: !!(r.a||r.alive), latency: r.l||r.latency||0 };
+  }
+  return out;
+}
+
+async function runWorkers(concurrency, task, total){
+  let running=0, resolved=0;
+  return new Promise(done=>{
+    function next(){
+      while(running < concurrency && resolved < total){
+        running++;
+        Promise.resolve().then(task).finally(()=>{
+          running--; resolved++;
+          if(resolved>=total) done();
+          else next();
+        });
+      }
+    }
+    next();
+  });
+}
+
+async function runDeepCycles(preAlive, concurrency, timeout, cycles, survival){
+  for(let c=1; c<cycles; c++){
+    if(S.stop) break;
+    S.currentCycle = c+1;
+    S.cycleTotal = preAlive.length;
+    S.cycleDone = 0;
+    const cycleMap = new Map();
+    S.rawCycles[c] = cycleMap;
+
+    const batches=[];
+    for(let i=0;i<preAlive.length;i+=concurrency) batches.push(preAlive.slice(i,i+concurrency));
+
+    for(let b=0;b<batches.length;b++){
+      if(S.stop) break;
+      const batch=batches[b];
+      S.batchTotal=batch.length; S.batchDone=0;
+      let idx=0;
+      await runWorkers(Math.min(concurrency,batch.length), async()=>{
+        if(idx>=batch.length||S.stop) return;
+        const ip=batch[idx++];
+        const res=await testIP(ip, timeout);
+        cycleMap.set(ip, normalizeRes(res));
+        S.completedTests++; S.cycleDone++; S.batchDone++;
+        scheduleUI();
+      }, batch.length);
+    }
+  }
+
+  // Merge cycles
+  const finalResults = new Map();
+  for(let ip of preAlive){
+    const merged={};
+    for(let m of METHODS){
+      let succ=0, best=Infinity;
+      for(let c=0;c<cycles;c++){
+        const d=S.rawCycles[c]?.get(ip)?.[m];
+        if(d?.alive){ succ++; if(d.latency<best) best=d.latency; }
+      }
+      const alive = survival ? (succ===cycles) : (succ>0);
+      if(alive) merged[m]={ alive:true, latency:best===Infinity?0:best, successes:succ, totalCycles:cycles };
+    }
+    if(Object.values(merged).some(v=>v?.alive)){
+      finalResults.set(ip, merged);
+    }
+  }
+
+  if(survival) S.results = finalResults;
+  else {
+    for(let [ip,data] of finalResults)
+      S.results.set(ip, data);
+  }
+}
+
+async function startScan(preset){
+  if(S.running) return;
+  const raw=document.getElementById('ipInput').value.trim();
+  const ips=extractIPs(raw);
+  if(!ips.length) return toast('❌ هیچ آی‌پی‌ای پیدا نشد');
+  const limited=ips.slice(0,2500);
+
+  let concurrency, timeout, cycles, survival;
+  if(preset){
+    ({concurrency,timeout,cycles,survival}=preset);
+    document.getElementById('inTimeout').value=timeout;
+    document.getElementById('inCycles').value=cycles;
+    document.getElementById('inConcurrency').value=concurrency;
+    document.getElementById('inSurvival').checked=survival;
+  } else {
+    timeout=+document.getElementById('inTimeout').value||2200;
+    cycles=+document.getElementById('inCycles').value||3;
+    concurrency=+document.getElementById('inConcurrency').value||24;
+    survival=document.getElementById('inSurvival').checked;
+  }
+
+  S={ running:true, stop:false, all:limited, processed:0,
+      results:new Map(), share:new Map(), rawCycles:[],
+      totalCycles:cycles, currentCycle:1, cyclesUsed:cycles,
+      totalTests:0, completedTests:0,
+      cycleTotal:0, cycleDone:0, batchTotal:0, batchDone:0 };
+
+  document.getElementById('btnStop').style.display='inline-flex';
+  document.getElementById('resultBody').innerHTML='<tr><td colspan="5" style="color:var(--dim);padding:20px;">🔄 در حال اسکن...</td></tr>';
+
+  const preAlive = await runPrescan(limited, concurrency);
+  if(cycles>1 && preAlive.length>0 && !S.stop)
+    await runDeepCycles(preAlive, concurrency, timeout, cycles, survival);
+
+  S.running=false;
+  document.getElementById('btnStop').style.display='none';
+  setBar('pBatch','pBatchTxt',100);
+  setBar('pOverall','pOverallTxt',100);
+  stopUITimer();
+  finalize();
+  toast('✅ اسکن پایان یافت');
+}
+
+// =================== FINALIZE + RENDER ===================
+function finalize(){
+  const shareMap=new Map();
+  for(let [ip,data] of S.results){
+    const alive=METHODS.filter(m=>data[m]?.alive);
+    const cnt=alive.length;
+    const cls=cnt>=4?'gold':(cnt===3?'silver':(cnt>=2?'bronze':''));
+    let stability=100;
+    if(S.rawCycles.length>1 && S.cyclesUsed>1){
+      let total=0,succ=0;
+      for(let m of alive)
+        for(let i=1;i<S.rawCycles.length;i++){
+          const e=S.rawCycles[i]?.get(ip)?.[m];
+          total++;
+          if(e?.alive) succ++;
+        }
+      stability=total?Math.round(succ/total*100):100;
+    }
+    shareMap.set(ip,{cnt,cls,stability});
+  }
+  S.share=shareMap;
+  document.getElementById('stAlive').textContent=shareMap.size;
+  document.getElementById('stGold').textContent=[...shareMap.values()].filter(v=>v.cls==='gold').length;
+  document.getElementById('stSilver').textContent=[...shareMap.values()].filter(v=>v.cls==='silver').length;
+  document.getElementById('stBronze').textContent=[...shareMap.values()].filter(v=>v.cls==='bronze').length;
+  renderProtoStats();
+  renderOutput();
+}
+
+function renderProtoStats(){
+  const card=document.getElementById('cardProtoStats');
+  if(!S.results.size){ card.style.display='none'; return; }
+  card.style.display='block';
+  const row=document.getElementById('protoStatsRow');
+  row.innerHTML=METHODS.map(m=>{
+    let cnt=0;
+    for(let [,d] of S.results) if(d[m]?.alive) cnt++;
+    return `<div class="pstat">
+      <div class="pstat-num" style="color:${PROTO_COLOR[m]};">${cnt}</div>
+      <div class="pstat-name">${PROTO_NAME[m]}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDots(){
+  ['mandatory','display'].forEach(type=>{
+    const container=document.getElementById(type==='mandatory'?'mandatoryDots':'displayDots');
+    const set=type==='mandatory'?mandatorySet:displaySet;
+    const cls=type==='mandatory'?'on-gold':'on-cyan';
+    container.innerHTML=METHODS.map(m=>`
+      <div class="pdot" onclick="toggleDot('${m}','${type}')">
+        <div class="pdot-circle ${set.has(m)?cls:''}">${set.has(m)?'✓':'○'}</div>
+        <div class="pdot-name">${PROTO_NAME[m]}</div>
+      </div>`).join('');
+  });
+}
+
+window.toggleDot=(m,type)=>{
+  const set=type==='mandatory'?mandatorySet:displaySet;
+  if(set.has(m)) set.delete(m); else set.add(m);
+  renderDots();
+  renderOutput();
+};
+
+function renderOutput(){
+  const sel=[...displaySet];
+  const man=[...mandatorySet];
+  const stabMin=+document.getElementById('stabSlider').value;
+  const pingMax=+document.getElementById('pingSlider').value;
+  const g=document.getElementById('fGold').checked;
+  const sv=document.getElementById('fSilver').checked;
+  const br=document.getElementById('fBronze').checked;
+  const all=document.getElementById('fAll').checked;
+
+  const list=[];
+  for(let [ip,data] of S.results){
+    const sh=S.share.get(ip); if(!sh) continue;
+    if(!all){
+      if(sh.cls==='gold' && !g) continue;
+      if(sh.cls==='silver' && !sv) continue;
+      if(sh.cls==='bronze' && !br) continue;
+      if(!sh.cls) continue;
+    }
+    let ok=true;
+    for(let m of man) if(!data[m]?.alive){ ok=false; break; }
+    if(!ok) continue;
+    if(sh.stability<stabMin) continue;
+    let minPing=Infinity;
+    for(let m of sel) if(data[m]?.alive && data[m].latency<minPing) minPing=data[m].latency;
+    if(minPing===Infinity) minPing=9999;
+    if(minPing>pingMax) continue;
+    const tags=sel.filter(m=>data[m]?.alive)
+      .map(m=>`<span class="proto-badge" style="color:${PROTO_COLOR[m]};border-color:${PROTO_COLOR[m]};">${PROTO_NAME[m]}</span>`).join('');
+    const score=minPing<150?'🟢':(minPing<350?'🟡':(minPing<700?'🟠':'🔴'));
+    const clsMap={gold:'gold-bg',silver:'silver-bg',bronze:'bronze-bg','':`badge`};
+    const medal=sh.cls==='gold'?'🏅':(sh.cls==='silver'?'🥈':(sh.cls==='bronze'?'🥉':''));
+    list.push({ip,sh,minPing,tags,score,medal});
+  }
+  list.sort((a,b)=>b.sh.stability-a.sh.stability||a.minPing-b.minPing);
+
+  const clsName={gold:'gold-bg',silver:'silver-bg',bronze:'bronze-bg'};
+  document.getElementById('resultBody').innerHTML=list.length
+    ? list.map(l=>`<tr>
+        <td><span class="badge ${clsName[l.sh.cls]||''}">${l.medal} ${l.ip}</span></td>
+        <td>${l.minPing===9999?'—':l.minPing+'ms'}</td>
+        <td>${l.sh.stability}٪</td>
+        <td>${l.score} ${l.minPing<150?'عالی':l.minPing<350?'خوب':l.minPing<700?'متوسط':'ضعیف'}</td>
+        <td>${l.tags}</td></tr>`).join('')
+    : '<tr><td colspan="5" style="color:var(--dim);padding:20px;">آی‌پی‌ای با این فیلترها پیدا نشد</td></tr>';
+
+  document.getElementById('simpleOutput').value=list.map(l=>l.ip).join('\n');
+}
+
+// =================== MY IP — REFRESH EVERY 1s ===================
+let lastKnownIP = null;
+
+async function refreshMyIP(){
+  // Method 1: WebRTC (fastest, no external request)
+  let ip = await getIPViaWebRTC();
+  if(!ip) ip = await getIPViaAPI();
+  const el = document.getElementById('myIp');
+  if(ip && ip !== lastKnownIP){
+    lastKnownIP = ip;
+    el.textContent = ip;
+    el.style.animation='none';
+    void el.offsetWidth;
+    el.style.animation='ipFlash 0.4s ease';
+  } else if(!ip){
+    el.textContent = 'در حال دریافت...';
+  }
+  updateNetMeta();
+}
+
+function getIPViaWebRTC(){
+  return new Promise(res=>{
+    try{
+      const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+      pc.createDataChannel('');
+      pc.createOffer().then(o=>pc.setLocalDescription(o));
+      const timer=setTimeout(()=>{pc.close();res(null);},1500);
+      pc.onicecandidate=e=>{
+        if(e.candidate){
+          const m=e.candidate.candidate.match(/(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)/);
+          if(m && !m[0].startsWith('0.')){
+            clearTimeout(timer); pc.close(); res(m[0]);
+          }
+        }
+      };
+    }catch(e){res(null);}
+  });
+}
+
+async function getIPViaAPI(){
+  try{
+    const r=await fetch('https://api.ipify.org?format=json',{cache:'no-store'});
+    const d=await r.json();
+    return d.ip||null;
+  }catch(e){ return null; }
+}
+
+function updateNetMeta(){
+  const meta=document.getElementById('ipMeta');
+  const chips=[];
+  if('connection' in navigator){
+    const c=navigator.connection;
+    if(c.effectiveType||c.type) chips.push(c.effectiveType||c.type);
+    if(c.downlink) chips.push(c.downlink+'Mbps');
+    if(c.rtt) chips.push('RTT '+c.rtt+'ms');
+  }
+  meta.innerHTML=chips.map(t=>`<span class="chip">${t}</span>`).join('');
+}
+
+// Start IP refresh loop
+refreshMyIP();
+setInterval(refreshMyIP, 1000);
+
+// Flash animation for IP change
+const style=document.createElement('style');
+style.textContent='@keyframes ipFlash{0%{color:#fff;text-shadow:0 0 12px #00e5ff}100%{color:var(--cyan);text-shadow:none}}';
+document.head.appendChild(style);
+
+// =================== EVENTS ===================
+document.getElementById('btnQuick').onclick=()=>startScan({cycles:1,timeout:1200,concurrency:30,survival:false});
+document.getElementById('btnDeep').onclick=()=>startScan({cycles:3,timeout:2200,concurrency:24,survival:true});
+document.getElementById('btnAdvanced').onclick=()=>document.getElementById('settingsPanel').classList.toggle('open');
+document.getElementById('btnCustom').onclick=()=>{ document.getElementById('settingsPanel').classList.remove('open'); startScan(null); };
+document.getElementById('btnStop').onclick=()=>{ S.stop=true; };
+
+document.getElementById('btnAkamai').onclick=()=>{ document.getElementById('ipInput').value=Array(400).fill(0).map(randAk).join('\n'); toast('🎲 ۴۰۰ آی‌پی آکامای'); };
+document.getElementById('btnGoogle').onclick=()=>{ document.getElementById('ipInput').value=Array(400).fill(0).map(randGo).join('\n'); toast('🎲 ۴۰۰ آی‌پی گوگل'); };
+document.getElementById('btnPaste').onclick=async()=>{
+  try{ document.getElementById('ipInput').value=await navigator.clipboard.readText(); toast('✅ جای‌گذاری شد'); }
+  catch(e){ toast('⚠️ خطا در کلیپ‌بورد'); }
+};
+document.getElementById('fileInput').onchange=function(e){
+  const f=e.target.files[0]; if(!f) return;
+  new FileReader().onload=ev=>{ document.getElementById('ipInput').value=ev.target.result; toast('📄 بارگذاری شد'); };
+  const r=new FileReader(); r.onload=ev=>{ document.getElementById('ipInput').value=ev.target.result; toast('📄 بارگذاری شد'); }; r.readAsText(f);
+};
+
+document.getElementById('stabSlider').oninput=function(){ document.getElementById('stabVal').textContent=this.value+'٪'; renderOutput(); };
+document.getElementById('pingSlider').oninput=function(){ document.getElementById('pingVal').textContent=this.value+'ms'; renderOutput(); };
+['fGold','fSilver','fBronze','fAll'].forEach(id=>document.getElementById(id).onchange=renderOutput);
+
+document.getElementById('btnCopy').onclick=()=>{
+  const t=document.getElementById('simpleOutput').value;
+  if(t) navigator.clipboard.writeText(t).then(()=>toast('📋 کپی شد')).catch(()=>toast('⚠️ خطا'));
+  else toast('⚠️ چیزی برای کپی نیست');
+};
+document.getElementById('btnDownload').onclick=()=>{
+  const t=document.getElementById('simpleOutput').value; if(!t) return toast('⚠️ خروجی خالیه');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));
+  a.download='ips-'+Date.now()+'.txt'; a.click(); URL.revokeObjectURL(a.href);
+  toast('💾 ذخیره شد');
+};
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// Init dots
+renderDots();
+</script>
+</body>
+</html>
